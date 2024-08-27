@@ -1,59 +1,55 @@
 
-var siteName = document.getElementById("siteName");
-var siteUrl = document.getElementById("siteUrl");
-var addBtn = document.getElementById("addWebsite");
-var searchBookmark = document.getElementById("search");
-var alertMessage = document.getElementById("alert");
-var mainIndex;
-var index = 0;
-var websitesContainer; //array
+const siteName = document.getElementById("siteName");
+const siteUrl = document.getElementById("siteUrl");
+const addBtn = document.getElementById("addWebsite");
+const searchBookmark = document.getElementById("search");
+const alertMessage = document.getElementById("alert");
+let mainIndex;
+let index = 0;
+let websitesContainer;
+
 checkStorage();
 
+
+
 function checkStorage() {
-  if (localStorage.getItem("website") == null) {
-    websitesContainer = [];
-  }
-  else {
-    websitesContainer = JSON.parse(localStorage.getItem("website"));
-    displayWebsites(websitesContainer);
-  }
+  websitesContainer = JSON.parse(localStorage.getItem("website")) || [];
+  displayWebsites(websitesContainer);
 }
+
 
 addBtn.addEventListener("click", addWebsite);
 
 
 
 function addWebsite() {
-  if (validateInputs() == true) {
+
+  if (validateInputs()) {
     alertMessage.innerHTML = "";
+
+    let website = {
+      name: siteName.value.trim(),
+      url: siteUrl.value.trim(),
+    }
+
     if (addBtn.innerHTML == "Update") {
-      addBtn.innerHTML = "Submit"
-      let bookmark = {
-        name: siteName.value,
-        url: siteUrl.value,
-      }
-      websitesContainer.splice(mainIndex, 1, bookmark);
+      addBtn.innerHTML = "Submit";
+      websitesContainer.splice(mainIndex, 1, website);
     } else {
-      let website = {
-        name: siteName.value,
-        url: siteUrl.value,
-      }
+      
     websitesContainer.push(website);
       
     }
     localStorage.setItem("website", JSON.stringify(websitesContainer));
     displayWebsites(websitesContainer);
     resetForm();
-  } else {
-    validateInputs();
   }
- 
 }
 
 
 function displayWebsites(array) {
   index = i;
-  var box = "";
+  let box = "";
   for (var i = 0; i < array.length; i++) {
     box += ` <tr>
                 <td>${i + 1}</td>
@@ -77,42 +73,50 @@ function deleteWebsite(indexNumber) {
   displayWebsites(websitesContainer);
 }
 
-function validate(text, pattern) {
-  return pattern.test(text);
-}
+
 function updateWebsite(indexNumber) {
-  mainIndex = indexNumber
+  mainIndex = indexNumber;
   siteName.value = websitesContainer[indexNumber].name;
   siteUrl.value = websitesContainer[indexNumber].url;
-  addBtn.innerHTML = "Update"
+  addBtn.innerHTML = "Update";
 }
 
 
 searchBookmark.addEventListener("input", function () {
-  var searchedBookmark = [];
-  for (let i = 0; i < websitesContainer.length; i++){
-    if (websitesContainer[i].name.toLowerCase().includes(searchBookmark.value.toLowerCase())) {
-      searchedBookmark.push(websitesContainer[i]);
-    }
-  }
-  displayWebsites(searchedBookmark);
+  const searchValue = searchBookmark.value.toLowerCase();
+  const filteredWebsites = websitesContainer.filter(website => 
+    website.name.toLowerCase().includes(searchValue) || 
+    website.url.toLowerCase().includes(searchValue)
+  );
+  displayWebsites(filteredWebsites);
 })
 
-function isUrlExist() {
-  for (let i = 1; i < websitesContainer.length; i++) {
-    if (websitesContainer[i].url.toLowerCase().includes(siteUrl.value.toLowerCase())) {
-      return true;
-    } else {
-      return false; 
+
+function validateInputs() {
+  const urlRegex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+  const isValidUrl = urlRegex.test(siteUrl.value);
+  const isEmpty = !siteName.value.trim() || !siteUrl.value.trim();
+
+  if (isEmpty) {
+    alertMessage.textContent = 'Please fill both fields';
+    return false;
+  }
+
+
+  if (!isValidUrl) {
+    alertMessage.textContent = 'Invalid URL. Please start with http:// or https://';
+    return false;
+  }
+
+
+  if (addBtn.innerHTML === "Submit") {
+    const existingWebsite = websitesContainer.find(website => website.url === siteUrl.value.trim());
+    if (existingWebsite) {
+      alertMessage.textContent = 'Website already added';
+      return false;
     }
   }
-}
-function validateInputs() {
-  if (isUrlExist() == true) {
-    return alertMessage.innerHTML = "Website already marked";
-  } else if (validate(siteUrl.value, /^https:\/\/.{2,}\..{2,}$/) == false) {
-    return alertMessage.innerHTML =  "URL Shoud Start With https://";
-  } 
+
   return true;
 }
 
