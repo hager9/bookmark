@@ -30,4 +30,6 @@
 2- Open the index.html file in your browser to view the app.
 
 ## Screenshots
+![Home Page](https://github.com/hager9/bookmark/blob/main/Screenshot%202024-10-10%20020207.png)
+![Home Page](https://github.com/hager9/bookmark/blob/main/Screenshot%202024-10-10%20020510.png)
 
